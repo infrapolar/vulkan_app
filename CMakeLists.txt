@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.26)
+project(vulkan_app)
+set(CMAKE_CXX_STANDARD 20)
+file(GLOB source_files "src/*.cpp" "src/*/*.cpp")
+find_package(glfw3)
+find_package(glm)
+add_executable(vulkan_app ${source_files})
+target_link_libraries(vulkan_app glfw vulkan)
