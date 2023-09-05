@@ -80,22 +80,19 @@ int main(){
 #endif
 
     ObjectDestroyer destroyer(instance, NULL, nullptr);
-    
+    destroyer.add(instance);
+    destroyer.add(window);
 #ifdef VALIDATION_LAYERS
-    VkDebugUtilsMessengerEXT debugMessenger = createDebugUtilsMessenger(instance, debugCallback);
-    destroyer.add(debugMessenger);
+    destroyer.add(createDebugUtilsMessenger(instance, debugCallback));
 #endif
     VkDevice device = getDevice(instance);
-    destroyer.device = device;
-
+    destroyer.setDevice(device);
+    destroyer.add(device);
 
 
     while(!glfwWindowShouldClose(window))
         glfwPollEvents();
-    glfwDestroyWindow(window);
-    glfwTerminate();
     destroyer.destroy();
-    vkDestroyDevice(device, nullptr);
-    vkDestroyInstance(instance, nullptr);
+    glfwTerminate();
     return 0;
 }
