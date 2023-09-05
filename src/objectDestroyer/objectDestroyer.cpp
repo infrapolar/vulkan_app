@@ -2,6 +2,12 @@
 #include <unordered_map>
 #include <cassert>
 
+ObjectDestroyer::ObjectDestroyer(VkInstance _instance, VkDevice _device, VkAllocationCallbacks* _pAlloc){
+    instance = _instance;
+    device = _device;
+    pAlloc = _pAlloc;
+}
+
 void ObjectDestroyer::destroy(){
     for (size_t i = 0; i < objects.size(); i++)
     {
