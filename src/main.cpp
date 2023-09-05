@@ -84,7 +84,6 @@ int main(){
 #ifdef VALIDATION_LAYERS
     VkDebugUtilsMessengerEXT debugMessenger = createDebugUtilsMessenger(instance, debugCallback);
     destroyer.add(debugMessenger);
-    std::cout << sizeof(std::type_index);
 #endif
     VkDevice device = getDevice(instance);
     destroyer.device = device;
