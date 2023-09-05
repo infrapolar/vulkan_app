@@ -1,6 +1,8 @@
 #include "objectDestroyer.h"
+#include <GLFW/glfw3.h>
 #include <unordered_map>
 #include <cassert>
+#include <stdexcept>
 
 ObjectDestroyer::ObjectDestroyer(VkInstance _instance, VkDevice _device, VkAllocationCallbacks* _pAllocator){
     instance = _instance;
@@ -28,11 +30,13 @@ void ObjectDestroyer::destroy(){
     }
 }
 void ObjectDestroyer::setDevice(VkDevice _device){
-    assert(device == NULL || (objects.empty() && !destroyDevice));
+    if(device != NULL && (!objects.empty() || destroyDevice))
+        throw std::runtime_error("You can't change device before destroy()");
     device = _device;
 }
 void ObjectDestroyer::setInstance(VkInstance _instance){
-    assert(instance == NULL || (objects.empty() && !destroyInstance));
+    if(instance != NULL && (!objects.empty() || destroyInstance))
+        throw std::runtime_error("You can't change instance before destroy()");
     instance = _instance;
 }
 template<> void ObjectDestroyer::destroyObject<VkDebugUtilsMessengerEXT>(VkInstance instance, VkDevice device, VkAllocationCallbacks *pAllocator, uint64_t object){
