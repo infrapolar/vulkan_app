@@ -3,7 +3,6 @@
 #pragma once
 #include <GLFW/glfw3.h>
 #include <vector>
-#include <cassert>
 struct ObjectDestroyer{
     typedef void (*PFN_destroy)(VkInstance instance, VkDevice device, VkAllocationCallbacks *pAllocator, uint64_t object);
     VkInstance instance;
