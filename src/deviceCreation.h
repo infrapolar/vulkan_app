@@ -1,3 +1,3 @@
 #pragma once
 #include <vulkan/vulkan.h>
-VkDevice getDevice(VkInstance instance);
+VkDevice getDevice(VkPhysicalDevice device);

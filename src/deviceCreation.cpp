@@ -1,8 +1,6 @@
 #include "deviceCreation.h"
-#include "devices/devices.h"
 #include <vector>
-VkDevice getDevice(VkInstance instance){
-    VkPhysicalDevice device = getPhysicalDevice(instance, nullptr);
+VkDevice getDevice(VkPhysicalDevice device){
     VkDevice logicalDevice;
     uint32_t queueCount;
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueCount, nullptr);
@@ -21,6 +19,9 @@ VkDevice getDevice(VkInstance instance){
     deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
     deviceCreateInfo.queueCreateInfoCount = 1;
     deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+    const char* extensions = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
+    deviceCreateInfo.ppEnabledExtensionNames = &extensions;
+    deviceCreateInfo.enabledExtensionCount = 1;
     vkCreateDevice(device, &deviceCreateInfo, nullptr, &logicalDevice);
     return logicalDevice;
 }

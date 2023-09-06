@@ -1,6 +1,5 @@
 #include "objectDestroyer.h"
 #include <GLFW/glfw3.h>
-#include <unordered_map>
 #include <cassert>
 #include <stdexcept>
 
@@ -57,6 +56,15 @@ template<> void ObjectDestroyer::destroyObject<GLFWwindow*>(VkInstance instance,
     static_assert(sizeof(uint64_t) >= sizeof(GLFWwindow*));
     glfwDestroyWindow((GLFWwindow*)object);
 }
+template<> void ObjectDestroyer::destroyObject<VkSurfaceKHR>(VkInstance instance, VkDevice device, VkAllocationCallbacks *pAllocator, uint64_t object){
+    static_assert(sizeof(uint64_t) >= sizeof(VkSurfaceKHR));
+    vkDestroySurfaceKHR(instance, (VkSurfaceKHR)object, pAllocator);
+}
+template<> void ObjectDestroyer::destroyObject<VkSwapchainKHR>(VkInstance instance, VkDevice device, VkAllocationCallbacks *pAllocator, uint64_t object){
+    static_assert(sizeof(uint64_t) >= sizeof(VkSwapchainKHR));
+    vkDestroySwapchainKHR(device, (VkSwapchainKHR)object, pAllocator);
+}
+
 
 template<>
 void ObjectDestroyer::add<VkInstance>(VkInstance object){
