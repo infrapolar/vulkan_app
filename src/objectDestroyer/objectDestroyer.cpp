@@ -2,7 +2,11 @@
 #include <GLFW/glfw3.h>
 #include <cassert>
 #include <stdexcept>
+#define DESTROY(type) template<> constexpr bool hasDestroyFunc<type> = true;\
+        template<> void ObjectDestroyer::destroyObject<type>(VkInstance instance, VkDevice device, VkAllocationCallbacks *pAllocator, uint64_t object)
 
+template<typename T>
+constexpr bool hasDestroyFunc = false;
 ObjectDestroyer::ObjectDestroyer(VkInstance _instance, VkDevice _device, VkAllocationCallbacks* _pAllocator){
     instance = _instance;
     device = _device;
@@ -38,42 +42,31 @@ void ObjectDestroyer::setInstance(VkInstance _instance){
         throw std::runtime_error("You can't change instance before destroy()");
     instance = _instance;
 }
-template<> void ObjectDestroyer::destroyObject<VkDebugUtilsMessengerEXT>(VkInstance instance, VkDevice device, VkAllocationCallbacks *pAllocator, uint64_t object){
+DESTROY(VkDebugUtilsMessengerEXT){
     static_assert(sizeof(uint64_t) >= sizeof(VkDebugUtilsMessengerEXT));
     auto func = ((PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT"));
     assert(func != nullptr && "vkDestroyDebugUtilsMessengerEXT");
     func(instance, (VkDebugUtilsMessengerEXT) object, pAllocator);
 }
-template<> void ObjectDestroyer::destroyObject<VkDevice>(VkInstance instance, VkDevice device, VkAllocationCallbacks *pAllocator, uint64_t object){
+DESTROY(VkDevice){
     static_assert(sizeof(uint64_t) >= sizeof(VkDevice));
     vkDestroyDevice((VkDevice)object, pAllocator);
 }
-template<> void ObjectDestroyer::destroyObject<VkInstance>(VkInstance instance, VkDevice device, VkAllocationCallbacks *pAllocator, uint64_t object){
+DESTROY(VkInstance){
     static_assert(sizeof(uint64_t) >= sizeof(VkInstance));
     vkDestroyInstance((VkInstance)object, pAllocator);
 }
-template<> void ObjectDestroyer::destroyObject<GLFWwindow*>(VkInstance instance, VkDevice device, VkAllocationCallbacks *pAllocator, uint64_t object){
+DESTROY(GLFWwindow*){
     static_assert(sizeof(uint64_t) >= sizeof(GLFWwindow*));
     glfwDestroyWindow((GLFWwindow*)object);
 }
-template<> void ObjectDestroyer::destroyObject<VkSurfaceKHR>(VkInstance instance, VkDevice device, VkAllocationCallbacks *pAllocator, uint64_t object){
+DESTROY(VkSurfaceKHR){
     static_assert(sizeof(uint64_t) >= sizeof(VkSurfaceKHR));
     vkDestroySurfaceKHR(instance, (VkSurfaceKHR)object, pAllocator);
 }
-template<> void ObjectDestroyer::destroyObject<VkSwapchainKHR>(VkInstance instance, VkDevice device, VkAllocationCallbacks *pAllocator, uint64_t object){
+DESTROY(VkSwapchainKHR){
     static_assert(sizeof(uint64_t) >= sizeof(VkSwapchainKHR));
     vkDestroySwapchainKHR(device, (VkSwapchainKHR)object, pAllocator);
-}
-
-
-template<>
-void ObjectDestroyer::add<VkInstance>(VkInstance object){
-    if(instance == object){
-        destroyInstance = true;
-        return;
-    }
-    objects.push_back(reinterpret_cast<uint64_t>(object));
-    destroyFuncs.push_back(destroyObject<VkInstance>);
 }
 template<>
 void ObjectDestroyer::add<VkDevice>(VkDevice object){
@@ -83,5 +76,15 @@ void ObjectDestroyer::add<VkDevice>(VkDevice object){
     }
     objects.push_back(reinterpret_cast<uint64_t>(object));
     destroyFuncs.push_back(destroyObject<VkDevice>);
+
+}
+template<>
+void ObjectDestroyer::add<VkInstance>(VkInstance object){
+    if(instance == object){
+        destroyInstance = true;
+        return;
+    }
+    objects.push_back(reinterpret_cast<uint64_t>(object));
+    destroyFuncs.push_back(destroyObject<VkInstance>);
 
 }
