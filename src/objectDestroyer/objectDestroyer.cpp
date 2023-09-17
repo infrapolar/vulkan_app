@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <cassert>
 #include <stdexcept>
+#include <type_traits>
 #define DESTROY(type) template<> constexpr bool hasDestroyFunc<type> = true;\
         template<> void ObjectDestroyer::destroyObject<type>(VkInstance instance, VkDevice device, VkAllocationCallbacks *pAllocator, uint64_t object)
 
@@ -12,10 +13,6 @@ ObjectDestroyer::ObjectDestroyer(VkInstance _instance, VkDevice _device, VkAlloc
     device = _device;
     pAllocator = _pAllocator;
 }
-ObjectDestroyer::~ObjectDestroyer(){
-    destroy();
-}
-
 void ObjectDestroyer::destroy(){
     for (size_t i = 0; i < objects.size(); i++)
     {
@@ -68,6 +65,14 @@ DESTROY(VkSwapchainKHR){
     static_assert(sizeof(uint64_t) >= sizeof(VkSwapchainKHR));
     vkDestroySwapchainKHR(device, (VkSwapchainKHR)object, pAllocator);
 }
+DESTROY(VkImageView){
+    static_assert(sizeof(uint64_t) >= sizeof(VkImageView));
+    vkDestroyImageView(device, (VkImageView)object, pAllocator);
+}
+DESTROY(VkFramebuffer){
+    static_assert(sizeof(uint64_t) >= sizeof(VkFramebuffer));
+    vkDestroyFramebuffer(device, (VkFramebuffer)object, pAllocator);
+}
 template<>
 void ObjectDestroyer::add<VkDevice>(VkDevice object){
     if(device == object){
@@ -88,3 +93,6 @@ void ObjectDestroyer::add<VkInstance>(VkInstance object){
     destroyFuncs.push_back(destroyObject<VkInstance>);
 
 }
+
+
+

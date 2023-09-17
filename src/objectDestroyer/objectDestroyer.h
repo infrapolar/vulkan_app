@@ -9,7 +9,6 @@ struct ObjectDestroyer{
     void setInstance(VkInstance instance);
     void setDevice(VkDevice device);
     ObjectDestroyer(VkInstance instance, VkDevice device, VkAllocationCallbacks* pAllocator);
-    ~ObjectDestroyer();
     void destroy();
     template<typename T>
     void add(T object){
